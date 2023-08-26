@@ -16,7 +16,7 @@ class Pilha{
   }
 
   public void MostrarElementos(){
-    Console.WriteLine("Elementos na fila:");
+    Console.WriteLine("Elementos da Pilha:");
     for(int i=elementos.Count-1;i>= 0;i--){
       Console.WriteLine(elementos[i]);
     }
