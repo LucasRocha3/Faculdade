@@ -6,7 +6,6 @@ import java.io.PrintWriter;
 import java.util.Scanner;
 import java.util.ArrayList;
 
-
 class Jogador {
     private int id;
     private String nome;
@@ -147,29 +146,30 @@ class Jogador {
         
     }
 }
-public class Selecao {
+
+public class sequencial {
     public static void main(String[] args) {
         try {
             long start = System.currentTimeMillis();
+            int c = 0;
 
             Scanner in = new Scanner(System.in);
             BufferedReader br = null;
 
-            //Criar vetor de jogadores
+            // Criar vetor de jogadores
             ArrayList<Jogador> jogadores = new ArrayList<>();
 
             String id = in.nextLine();
 
-            // Pegar os Ids de entrada
+            // Pegar os Ids de entrada e preencher o vetor de jogadores
             while (!isFim(id)) {
                 br = new BufferedReader(new FileReader("/tmp/players.csv"));
                 int linhaDesejada = Integer.parseInt(id) + 2;
                 int linhaAtual = 1;
                 String linha;
 
-                // Preencher o vetor de jogadores
                 while ((linha = br.readLine()) != null) {
-                    if (linhaAtual == linhaDesejada) { 
+                    if (linhaAtual == linhaDesejada) {
                         Jogador jogador = new Jogador();
                         jogador.ler(linha); 
                         jogadores.add(jogador);
@@ -183,14 +183,24 @@ public class Selecao {
                 br.close();
             }
 
+            String nome = in.nextLine();
+
+            // Fazer as pesquisas sequenciais
+            while (!isFim(nome)) {
+
+                if (search(nome, jogadores)) {
+                    System.out.println("SIM");
+                } else {
+                    System.out.println("NAO");
+                }
+
+                c += jogadores.size();
+
+                nome = in.nextLine();
+            }
+
             in.close();
 
-            int c = sort(jogadores);
-
-            for(int i = 0; i < jogadores.size(); i++){
-                jogadores.get(i).imprimir();
-            }
-            
             long end = System.currentTimeMillis();
             criarLog("801434\t" + (end - start) + "ms\t" + c);
         } catch (IOException e) {
@@ -198,29 +208,20 @@ public class Selecao {
         }
     }
 
-    public static int sort(ArrayList<Jogador> jogadores){
-      Jogador aux = null;
-      int c = 0;
-
-      for(int i = 0; i < jogadores.size()  - 1; i++){
-        int menor = i;
-        for(int j = i + 1; j < jogadores.size(); j++){
-            if(jogadores.get(j).getNome().compareTo(jogadores.get(menor).getNome()) < 0){
-                menor = j;
+    public static boolean search(String nome, ArrayList<Jogador> jogadores) {
+        boolean resp = false;
+        for (int i = 0; i < jogadores.size(); i++) {
+            if (jogadores.get(i).getNome().equals(nome)) {
+                resp = true;
+                i = jogadores.size();
             }
-            c ++;
         }
-        aux = jogadores.get(menor);
-        jogadores.set(menor, jogadores.get(i));
-        jogadores.set(i, aux);
-      }
-
-      return  c;
+        return resp;
     }
 
     public static void criarLog(String m) {
         try {
-            FileWriter arquivo = new FileWriter("matrícula_selecao.txt");
+            FileWriter arquivo = new FileWriter("matrícula_sequencial.txt");
             PrintWriter gravador = new PrintWriter(arquivo);
             gravador.println(m);
 
@@ -234,4 +235,5 @@ public class Selecao {
     public static boolean isFim(String str) {
         return str.charAt(0) == 'F' && str.charAt(1) == 'I' && str.charAt(2) == 'M';
     }
+    
 }

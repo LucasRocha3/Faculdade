@@ -192,7 +192,7 @@ public class Insercao {
             }
 
             long end = System.currentTimeMillis();
-            criarLog("812573\t" + (end - start) + "ms\t" + c);
+            criarLog("801434\t" + (end - start) + "ms\t" + c);
         } catch (IOException e) {
             System.err.println(e);
         }
