@@ -4,9 +4,10 @@ import java.io.FileReader;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.util.List;
 
-class TP02Q09 {
-static class Jogador {
+class Jogador {
 
     private int id;
     private String nome;
@@ -103,10 +104,6 @@ static class Jogador {
         return estadoNascimento;
     }
 
-    public int compareTo(Jogador proximo) {
-        return this.altura - proximo.altura;
-    }
-
     public void imprimirDados() {
         System.out.println("[" + getId() + " ## " + getNome() + " ## " + getAltura() + " ## " 
         + getPeso() + " ## " + getAnoNascimento() + " ## " + getUniversidade() + " ## " + getCidadeNascimento() + " ## " + getEstadoNascimento() + "]");
@@ -147,123 +144,104 @@ static class Jogador {
     }
 }
 
+public class TPQ02018 {
+public static void main(String[] args) {
 
-    static int comparacoes = 0;
-    static int movimentacoes = 0;
-    public static void main(String[] args) {
-
-    // Captura do tempo inicial
-    long tempoInicio = System.currentTimeMillis();
+    // Criação de uma lista para armazenar objetos da classe Jogador
+    ArrayList<Jogador> listaJogadores = new ArrayList<>();
     
-    // Lista de jogadores
-    ArrayList<Jogador> jogadores = new ArrayList<>();
-
-    try {
-        // Leitura do arquivo CSV e preenchimento da lista de jogadores
-        FileReader fileReader = new FileReader("/tmp/players.csv");
-        BufferedReader arquivo = new BufferedReader(fileReader);
-        arquivo.readLine(); // Ignora o cabeçalho
+    try{
+        // Leitura do arquivo players.csv
+        FileReader leitorArquivo = new FileReader("/tmp/players.csv");
+        BufferedReader arquivo = new BufferedReader(leitorArquivo);   
+        
+        // Ignora a primeira linha (cabeçalho) do arquivo CSV
+        arquivo.readLine();
+        
+        // Lê os dados do arquivo e cria objetos Jogador, adicionando-os à listaJogadores
         while (arquivo.ready()) {
             Jogador jogador = new Jogador();
             jogador.lerDados(arquivo.readLine());
-            jogadores.add(jogador);
+            listaJogadores.add(jogador);
         }
         arquivo.close();
-    } catch (Exception e) {
-        // Tratamento de exceções
-        System.out.println("Erro ao ler o arquivo: " + e.getMessage());
+    } catch(Exception e){
+       // Captura e imprime mensagens de exceção em caso de erro durante a leitura do arquivo
+       System.out.println("Erro ao ler o arquivo: " + e.getMessage() + "\n" + e.getLocalizedMessage());
     }
-
-    // Lista para armazenar jogadores selecionados pelo usuário
+    
+    // Criação de uma lista para armazenar jogadores selecionados pelo usuário
     ArrayList<Jogador> jogadoresSelecionados = new ArrayList<>();
-
     Scanner scanner = new Scanner(System.in);
+    
+    // Leitura do ID dos jogadores a serem selecionados, termina quando o usuário digita "FIM"
     String id = scanner.nextLine();
-
     while (!id.equals("FIM")) {
-        jogadoresSelecionados.add(jogadores.get(Integer.parseInt(id)));
+        jogadoresSelecionados.add(listaJogadores.get(Integer.parseInt(id)));
         id = scanner.nextLine();
     }
 
-    // Ordena a lista de jogadores selecionados usando o algoritmo Heap Sort
-    heapSort(jogadoresSelecionados);
-
-    // Exibe os jogadores ordenados
-    for (int i = 0; i < jogadoresSelecionados.size(); i++) {
+    // Ordenação parcial da lista de jogadores selecionados usando o algoritmo QuickSort
+    quickSortParcial(jogadoresSelecionados, 0, jogadoresSelecionados.size() - 1);
+    
+    // Remoção dos jogadores excendentes (a partir do 11º) da lista
+    int n = 10;
+    if(n >= 0 && n < jogadoresSelecionados.size()){
+        List<Jogador> subLista = jogadoresSelecionados.subList(n, jogadoresSelecionados.size());
+        subLista.clear();
+    }
+    
+    // Impressão dos dados dos jogadores selecionados
+    for(int i = 0; i < jogadoresSelecionados.size(); i++){
         jogadoresSelecionados.get(i).imprimirDados();
     }
 
-    // Captura do tempo final
-    long tempoFim = System.currentTimeMillis();
-
-    try {
-        // Escreve os resultados no arquivo de saída
-        FileWriter fileWriter = new FileWriter("matricula_heapsort.txt");
-        BufferedWriter arqWriter = new BufferedWriter(fileWriter);
-        arqWriter.write("Matricula: 801434\tTempo: " + (tempoFim - tempoInicio) / 1000d +
-                "\tComparacoes: " + comparacoes + "\tMovimentacoes: " + movimentacoes);
-        arqWriter.close();
-    } catch (Exception e) {
-        // Tratamento de exceções ao escrever no arquivo
-        System.out.println("Erro ao escrever no arquivo: " + e.getMessage());
-    }
-
-    // Fechamento do scanner
     scanner.close();
 }
 
-// Implementação do algoritmo Heap Sort
-public static void heapSort(ArrayList<Jogador> heapArray) {
-    int n = heapArray.size();
+// Método para ordenar uma lista de jogadores parcialmente usando o algoritmo QuickSort
+public static void quickSortParcial(ArrayList<Jogador> array, int esquerda, int direita){
+    int i = esquerda, j = direita;
+    
+    // Escolha do pivo para comparação
+    Jogador pivo = array.get((esquerda + direita) / 2);
+    
+    // Particionamento do array com base no pivo
+    while(i <= j){
+        while(compare(array.get(i), pivo) < 0){
+            i++;
+        }
+        while(compare(array.get(j), pivo) > 0){
+            j--;
+        }
+        if(i <= j){
+            // Troca de elementos
+            Jogador temp = array.get(i);
+            array.set(i, array.get(j));
+            array.set(j, temp);
+            i++;
+            j--;
+        }
+    }   
 
-    // Construção do heap
-    for (int i = n / 2; i >= 0; i--) {
-        heap(heapArray, n, i);
+    // Chamadas recursivas para ordenar as partições à esquerda e à direita do pivo
+    if(esquerda < j){
+        quickSortParcial(array, esquerda, j);
     }
-
-    // Extrai elementos um por um do heap
-    for (int i = n - 1; i >= 0; i--) {
-        // Move a raiz atual para o final da lista ordenada
-        Jogador temporaria = heapArray.get(0);
-        heapArray.set(0, heapArray.get(i));
-        heapArray.set(i, temporaria);
-        // Reconstrói o heap
-        heap(heapArray, i, 0);
-        movimentacoes += 3;
+    if(i < direita){
+        quickSortParcial(array, i, direita);
     }
 }
 
-// Função para construir o heap
-public static void heap(ArrayList<Jogador> listaHeap, int n, int i) {
-    int maior = i;
-    int esquerda = 2 * i + 1;
-    int direita = 2 * i + 2;
-
-    // Compara o filho da esquerda com a raiz
-    if (esquerda < n && (listaHeap.get(esquerda).compareTo(listaHeap.get(maior)) > 0
-            || (listaHeap.get(esquerda).compareTo(listaHeap.get(maior)) == 0 &&
-            listaHeap.get(esquerda).getNome().compareTo(listaHeap.get(maior).getNome()) > 0))) {
-        maior = esquerda;
-        comparacoes += 3;
+// Método para comparar dois objetos Jogador com base no estado de nascimento e nome
+public static int compare(Jogador jogador1, Jogador jogador2){
+    // Comparação dos estados de nascimento dos jogadores
+    int resultado = jogador1.getEstadoNascimento().compareToIgnoreCase(jogador2.getEstadoNascimento());
+    
+    // Se os estados de nascimento forem iguais, comparação dos nomes dos jogadores
+    if(resultado == 0){
+        resultado = jogador1.getNome().compareToIgnoreCase(jogador2.getNome());
     }
-
-    // Compara o filho da direita com a raiz e o filho da esquerda
-    if (direita < n && (listaHeap.get(direita).compareTo(listaHeap.get(maior)) > 0
-            || (listaHeap.get(direita).compareTo(listaHeap.get(maior)) == 0
-            && listaHeap.get(direita).getNome().compareTo(listaHeap.get(maior).getNome()) > 0))) {
-        maior = direita;
-        comparacoes += 3;
-    }
-
-    // Se o maior não é a raiz
-    if (maior != i) {
-        // Troca a raiz com o maior elemento
-        Jogador swap = listaHeap.get(i);
-        listaHeap.set(i, listaHeap.get(maior));
-        listaHeap.set(maior, swap);
-        movimentacoes += 3;
-        // Recursivamente reconstrói o heap afetado
-        heap(listaHeap, n, maior);
-    }
+    return resultado;
 }
 }

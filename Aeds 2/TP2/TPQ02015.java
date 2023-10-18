@@ -142,91 +142,77 @@ class Jogador {
     }
 }
 
-public class TP02Q07 {
-    public static void main(String[] args) {
-        // Obtendo o tempo de início da execução do programa
-        long inicioTempo = System.currentTimeMillis();
-        
-        // Criando uma lista para armazenar os jogadores do arquivo
-        ArrayList<Jogador> listaJogadores = new ArrayList<>();
+public class TPQ02015 {
+    public static int totalComparisons = 0; 
+    public static int totalSwaps = 0; 
 
+    public static void main(String[] args) {
+        long startTime = System.currentTimeMillis();
+        ArrayList<Jogador> listaJogadores = new ArrayList<>();
+        
         try {
-            // Lendo dados do arquivo players.csv e populando a lista de jogadores
             FileReader leitorArquivo = new FileReader("/tmp/players.csv");
-            BufferedReader arquivo = new BufferedReader(leitorArquivo);   
-            arquivo.readLine(); // Ignorando a primeira linha (cabeçalho)
-            while (arquivo.ready()) {
+            BufferedReader bufferedReader = new BufferedReader(leitorArquivo);
+            bufferedReader.readLine();
+            while (bufferedReader.ready()) {
                 Jogador jogador = new Jogador();
-                jogador.lerDados(arquivo.readLine());
+                jogador.lerDados(bufferedReader.readLine());
                 listaJogadores.add(jogador);
             }
-            arquivo.close();
-        } catch(Exception e){
-            // Lidando com exceções de leitura do arquivo
+            bufferedReader.close();
+        } catch (Exception e) {
             System.out.println("Erro ao ler o arquivo: " + e.getMessage());
         }
-        
-        // Criando uma lista para armazenar jogadores selecionados pelo usuário
+
         ArrayList<Jogador> jogadoresSelecionados = new ArrayList<>();
         Scanner scanner = new Scanner(System.in);
         String id = scanner.nextLine();
         while (!id.equals("FIM")) {
-            // Adicionando jogadores à lista de jogadores selecionados
             jogadoresSelecionados.add(listaJogadores.get(Integer.parseInt(id)));
             id = scanner.nextLine();
         }
 
-        // Chamando o algoritmo de ordenação e obtendo estatísticas de comparações e movimentações
-        int[] contador = insertionSort(jogadoresSelecionados);
+        selectionSortPartial(jogadoresSelecionados);
 
-        // Exibindo os dados dos jogadores ordenados
-        for (int i = 0; i < jogadoresSelecionados.size(); i++) {
+        for (int i = 0; i < 10; i++) {
             jogadoresSelecionados.get(i).imprimirDados();
         }
 
-        // Obtendo o tempo de término da execução do programa
-        long fimTempo = System.currentTimeMillis();
+        long endTime = System.currentTimeMillis();
         try {
-            // Escrevendo estatísticas no arquivo de saída
-            FileWriter escritorArquivo = new FileWriter("matricula_insercao.txt");
-            BufferedWriter arqWriter = new BufferedWriter(escritorArquivo);
-            arqWriter.write("Matricula: 801434\tTempo: " + (fimTempo - inicioTempo) / 1000d + "\tComparacoes: " + contador[0] + "\tMovimentacoes: " + contador[1]);
-            arqWriter.close();
-        } catch(Exception e){
-            // Lidando com exceções ao escrever no arquivo
+            FileWriter escritorArquivo = new FileWriter("matricula_selectionParcial.txt");
+            BufferedWriter bufferedWriter = new BufferedWriter(escritorArquivo);
+            bufferedWriter.write("Matricula: 801434\tTempo: " + (endTime - startTime) / 1000d +
+                                 "\tComparacoes: " + totalComparisons + "\tMovimentacoes: " + totalSwaps);
+            bufferedWriter.close();
+        } catch (Exception e) {
             System.out.println("Erro ao escrever no arquivo: " + e.getMessage());
         }
         scanner.close();
     }
 
-    // Algoritmo de ordenação por inserção
-    public static int[] insertionSort(ArrayList<Jogador> insercao){
-        int tamanho = insercao.size();
-        int comparacoes = 0;
-        int movimentacoes = 0;
-
-        for(int i = 1; i < tamanho; i++){
-            Jogador temporario = insercao.get(i);
-            int j = i - 1;
-            comparacoes++;
-            while(j >= 0 && insercao.get(j).getAnoNascimento() > temporario.getAnoNascimento()){
-                // Movendo jogadores para a direita para abrir espaço para inserção
-                insercao.set(j + 1, insercao.get(j));
-                j--;
+    // Método para ordenar parcialmente a lista de jogadores usando o Selection Sort
+    public static void selectionSortPartial(ArrayList<Jogador> array) {
+        int tamanho = array.size();
+        int elementosOrdenados = 10; // Número de elementos a serem ordenados
+        for (int i = 0; i < elementosOrdenados; i++) {
+            int indiceMenor = i;
+            for (int j = i + 1; j < tamanho; j++) {
+                totalComparisons++;
+                // Compara os nomes dos jogadores ignorando maiúsculas e minúsculas
+                if (array.get(j).getNome().compareToIgnoreCase(array.get(indiceMenor).getNome()) < 0) {
+                    indiceMenor = j;
+                }
             }
-
-            while(j >= 0 && insercao.get(j).getAnoNascimento() == temporario.getAnoNascimento() && insercao.get(j).getNome().compareTo(temporario.getNome()) > 0){
-                // Movendo jogadores para a direita se o ano de nascimento for o mesmo, mas o nome for maior em ordem lexicográfica
-                insercao.set(j + 1, insercao.get(j));
-                j--;
-                movimentacoes += 2;
-            }
-            // Inserindo o jogador na posição correta
-            insercao.set(j + 1, temporario);
-            movimentacoes++;
+            swap(array, indiceMenor, i);
         }
-        // Retornando o número de comparações e movimentações
-        return new int[] {comparacoes, movimentacoes};
+    }
+
+    // Método para trocar dois elementos na lista
+    public static void swap(ArrayList<Jogador> array, int i, int j) {
+        Jogador temporario = array.get(i);
+        array.set(i, array.get(j));
+        array.set(j, temporario);
+        totalSwaps++;
     }
 }
-

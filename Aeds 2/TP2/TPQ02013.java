@@ -4,9 +4,9 @@ import java.io.FileReader;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.io.FileWriter;
+import java.util.Comparator;
 
-class TP02Q09 {
-static class Jogador {
+class Jogador {
 
     private int id;
     private String nome;
@@ -103,10 +103,6 @@ static class Jogador {
         return estadoNascimento;
     }
 
-    public int compareTo(Jogador proximo) {
-        return this.altura - proximo.altura;
-    }
-
     public void imprimirDados() {
         System.out.println("[" + getId() + " ## " + getNome() + " ## " + getAltura() + " ## " 
         + getPeso() + " ## " + getAnoNascimento() + " ## " + getUniversidade() + " ## " + getCidadeNascimento() + " ## " + getEstadoNascimento() + "]");
@@ -116,6 +112,17 @@ static class Jogador {
         Jogador clone = new Jogador(getId(), getNome(), getAltura(), getPeso(), getUniversidade(), getAnoNascimento(), getCidadeNascimento(), getEstadoNascimento());
         return clone;
     }
+
+    public static Comparator<Jogador> CompUniversidade = new Comparator<Jogador>() {
+        @Override
+        public int compare(Jogador jogador1, Jogador jogador2) {
+            int resp = jogador1.getUniversidade().compareTo(jogador2.getUniversidade());
+            if (resp == 0) {
+                return jogador1.getNome().compareTo(jogador2.getNome());
+            }
+            return resp;
+        }
+    };
 
     public void lerDados(String dadosJogador) {
         String[] posicao = new String[8];
@@ -147,123 +154,106 @@ static class Jogador {
     }
 }
 
-
-    static int comparacoes = 0;
-    static int movimentacoes = 0;
-    public static void main(String[] args) {
-
-    // Captura do tempo inicial
-    long tempoInicio = System.currentTimeMillis();
-    
-    // Lista de jogadores
+public class TPQ02013 {
+	public static int comparacao = 0;
+	public static int movimentacoes = 0;
+	public static void main(String[] args) {
+    // Obtém o tempo inicial para calcular a duração do processo
+    long tempoInicial = System.currentTimeMillis();
+    // Cria uma lista para armazenar os jogadores
     ArrayList<Jogador> jogadores = new ArrayList<>();
 
     try {
-        // Leitura do arquivo CSV e preenchimento da lista de jogadores
-        FileReader fileReader = new FileReader("/tmp/players.csv");
-        BufferedReader arquivo = new BufferedReader(fileReader);
-        arquivo.readLine(); // Ignora o cabeçalho
+        // Lê dados do arquivo e cria objetos Jogador
+        FileReader leitorArquivo = new FileReader("/tmp/players.csv");
+        BufferedReader arquivo = new BufferedReader(leitorArquivo);   
+        arquivo.readLine(); // Ignora a primeira linha (cabeçalho)
         while (arquivo.ready()) {
             Jogador jogador = new Jogador();
             jogador.lerDados(arquivo.readLine());
             jogadores.add(jogador);
         }
         arquivo.close();
-    } catch (Exception e) {
-        // Tratamento de exceções
-        System.out.println("Erro ao ler o arquivo: " + e.getMessage());
+    } catch(Exception excecao) {
+        // Captura e imprime qualquer exceção que ocorra durante a leitura do arquivo
+        System.out.println(excecao.getMessage() + "\n" + excecao.getLocalizedMessage());
     }
 
     // Lista para armazenar jogadores selecionados pelo usuário
     ArrayList<Jogador> jogadoresSelecionados = new ArrayList<>();
-
     Scanner scanner = new Scanner(System.in);
     String id = scanner.nextLine();
-
+    // Lê IDs dos jogadores até que o usuário insira "FIM"
     while (!id.equals("FIM")) {
         jogadoresSelecionados.add(jogadores.get(Integer.parseInt(id)));
         id = scanner.nextLine();
     }
 
-    // Ordena a lista de jogadores selecionados usando o algoritmo Heap Sort
-    heapSort(jogadoresSelecionados);
+    // Chama o algoritmo de ordenação MergeSort
+    MergeSort(jogadoresSelecionados, Jogador.CompUniversidade);
 
-    // Exibe os jogadores ordenados
-    for (int i = 0; i < jogadoresSelecionados.size(); i++) {
+    // Imprime os jogadores ordenados
+    for(int i = 0; i < jogadoresSelecionados.size(); i++) {
         jogadoresSelecionados.get(i).imprimirDados();
     }
 
-    // Captura do tempo final
-    long tempoFim = System.currentTimeMillis();
-
+    // Obtém o tempo final e escreve as estatísticas no arquivo de saída
+    long tempoFinal = System.currentTimeMillis();
     try {
-        // Escreve os resultados no arquivo de saída
-        FileWriter fileWriter = new FileWriter("matricula_heapsort.txt");
-        BufferedWriter arqWriter = new BufferedWriter(fileWriter);
-        arqWriter.write("Matricula: 801434\tTempo: " + (tempoFim - tempoInicio) / 1000d +
-                "\tComparacoes: " + comparacoes + "\tMovimentacoes: " + movimentacoes);
-        arqWriter.close();
-    } catch (Exception e) {
-        // Tratamento de exceções ao escrever no arquivo
-        System.out.println("Erro ao escrever no arquivo: " + e.getMessage());
+        FileWriter escritorArquivo = new FileWriter("matricula_mergesort.txt");
+        BufferedWriter arqEscritor = new BufferedWriter(escritorArquivo);
+        // Escreve informações no arquivo: Matrícula, Tempo, Comparacoes e Movimentacoes
+        arqEscritor.write("Matricula: 801434\tTempo: " + (tempoFinal - tempoInicial) / 1000d + "\tComparacoes: " + comparacao + "\tMovimentacoes: " + movimentacoes);
+        arqEscritor.close();
+    } catch(Exception excecao) {
+        // Captura e imprime qualquer exceção que ocorra ao escrever no arquivo
+        System.out.println(excecao.getMessage() + "\n" + excecao.getLocalizedMessage());
     }
-
-    // Fechamento do scanner
     scanner.close();
 }
 
-// Implementação do algoritmo Heap Sort
-public static void heapSort(ArrayList<Jogador> heapArray) {
-    int n = heapArray.size();
+// Implementação do algoritmo de ordenação MergeSort
+public static void MergeSort(ArrayList<Jogador> array, Comparator<Jogador> comparador) {
+    // Verifica se a lista possui mais de um elemento
+    if(array.size() > 1) {
+        comparacao++;
+        // Calcula o índice do meio da lista
+        int meio = array.size() / 2;
+        // Divide a lista em duas partes: esquerda e direita
+        ArrayList<Jogador> esquerda = new ArrayList<>(array.subList(0, meio));
+        ArrayList<Jogador> direita = new ArrayList<>(array.subList(meio, array.size()));
+        // Chama recursivamente o MergeSort para ambas as partes
+        MergeSort(esquerda, comparador);
+        movimentacoes++;
+        MergeSort(direita, comparador);
+        movimentacoes++;
+        // Inicializa índices para percorrer as listas esquerda e direita
+        int i = 0, j = 0, k = 0;
+        // Combina as listas ordenadas de volta na lista original
+        while(i < esquerda.size() && j < direita.size()) {
+            comparacao++;
+            // Compara os elementos das listas esquerda e direita
+            if(comparador.compare(esquerda.get(i), direita.get(j)) < 0) {
+                comparacao++;
+                // Se o elemento da esquerda é menor, insere na lista original
+                array.set(k++, esquerda.get(i++));
+            } else {
+                comparacao++;
+                // Se o elemento da direita é menor, insere na lista original
+                array.set(k++, direita.get(j++));
+            }
+        }
 
-    // Construção do heap
-    for (int i = n / 2; i >= 0; i--) {
-        heap(heapArray, n, i);
-    }
-
-    // Extrai elementos um por um do heap
-    for (int i = n - 1; i >= 0; i--) {
-        // Move a raiz atual para o final da lista ordenada
-        Jogador temporaria = heapArray.get(0);
-        heapArray.set(0, heapArray.get(i));
-        heapArray.set(i, temporaria);
-        // Reconstrói o heap
-        heap(heapArray, i, 0);
-        movimentacoes += 3;
-    }
-}
-
-// Função para construir o heap
-public static void heap(ArrayList<Jogador> listaHeap, int n, int i) {
-    int maior = i;
-    int esquerda = 2 * i + 1;
-    int direita = 2 * i + 2;
-
-    // Compara o filho da esquerda com a raiz
-    if (esquerda < n && (listaHeap.get(esquerda).compareTo(listaHeap.get(maior)) > 0
-            || (listaHeap.get(esquerda).compareTo(listaHeap.get(maior)) == 0 &&
-            listaHeap.get(esquerda).getNome().compareTo(listaHeap.get(maior).getNome()) > 0))) {
-        maior = esquerda;
-        comparacoes += 3;
-    }
-
-    // Compara o filho da direita com a raiz e o filho da esquerda
-    if (direita < n && (listaHeap.get(direita).compareTo(listaHeap.get(maior)) > 0
-            || (listaHeap.get(direita).compareTo(listaHeap.get(maior)) == 0
-            && listaHeap.get(direita).getNome().compareTo(listaHeap.get(maior).getNome()) > 0))) {
-        maior = direita;
-        comparacoes += 3;
-    }
-
-    // Se o maior não é a raiz
-    if (maior != i) {
-        // Troca a raiz com o maior elemento
-        Jogador swap = listaHeap.get(i);
-        listaHeap.set(i, listaHeap.get(maior));
-        listaHeap.set(maior, swap);
-        movimentacoes += 3;
-        // Recursivamente reconstrói o heap afetado
-        heap(listaHeap, n, maior);
+        // Adiciona quaisquer elementos restantes da lista esquerda
+        while(i < esquerda.size()) {
+            comparacao++;
+            array.set(k++, esquerda.get(i++));
+        }
+        // Adiciona quaisquer elementos restantes da lista direita
+        while(j < direita.size()) {
+            comparacao++;
+            array.set(k++, direita.get(j++));
+        }
     }
 }
 }

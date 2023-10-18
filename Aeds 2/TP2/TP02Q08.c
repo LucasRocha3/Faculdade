@@ -206,7 +206,7 @@ int main (){
    char dadosLinha[1000];
 
    // Abre o arquivo de entrada no modo leitura
-   FILE* arquivoEntrada = fopen("/tmp/playersAtualizado.csv", "r");
+   FILE* arquivoEntrada = fopen("/tmp/players.csv", "r");
 
    // Declaração de um array para armazenar os jogadores
    Jogador jogadores[3922];

@@ -198,63 +198,6 @@ typedef struct Jogador{
         *y = *x;
         *x = tmp;
     }
-    // Função para obter o dígito apropriado do ID do atributo
-    int getDigito(int id, int exp) {
-        // Exp deve ser 1, 10, 100, ... para pegar os dígitos do ID
-            return (id / exp) % 10;
-        }
-
-    void radixsort(Jogador *array, int n, int exp) {
-        Jogador output[n];
-        int count[10] = {0}; // Inicializa o array de contagem
-
-        // Contagem dos elementos
-        for (int i = 0; i < n; i++) {
-            int id = getID(&array[i]);
-            int digit = getDigito(id, exp);
-            count[digit]++;
-        }
-
-        // Agora, count[i] contém o número de elementos menores ou iguais a i
-        for (int i = 1; i < 10; i++) {
-            count[i] += count[i - 1];
-        }
-
-        // Ordenando
-        for (int i = n - 1; i >= 0; i--) {
-            int id = getID(&array[i]);
-            int digit = getDigito(id, exp);
-            output[count[digit] - 1] = array[i];
-            count[digit]--;
-        }
-
-        // Copiando de volta para o array original
-        for (int i = 0; i < n; i++) {
-            array[i] = output[i];
-        }
-    }
-
-    int getMaiorID(Jogador *array, int n) {
-        int maxID = getID(&array[0]);
-        for (int i = 1; i < n; i++) {
-            int id = getID(&array[i]);
-            if (id > maxID) {
-                maxID = id;
-            }
-        }
-        return maxID;
-    }
-    void radixsortID(Jogador *array, int n) {
-        int maxID = getMaiorID(array, n);
-
-        // Exp começa em 1 e é multiplicado por 10 a cada iteração para pegar cada dígito do ID
-        for (int exp = 1; maxID / exp > 0; exp *= 10) {
-            radixsort(array, n, exp);
-        }
-    }
-
-    
-
 
 
 
@@ -291,12 +234,19 @@ int main(void) {
         }
         scanf("%s", entrada);
     }
+    //algorítmo de ordenacão por insercao pelo ano de nascimento
+    for(int i = 1; i <= controle; i++){
+        Jogador tmp = jogadorID[i];
+        int j = (i < 10) ? (i - 1) : (10 - 1);
+        while(j >= 0 && (getAno(&jogadorID[j]) > getAno(&tmp) ||(getAno(&jogadorID[j]) == getAno(&tmp) && strcmp(getNome(&jogadorID[j]),getNome(&tmp)) > 0))){
+            jogadorID[j + 1] = jogadorID[j];
+            j--;
+        }
+        jogadorID[j + 1] = tmp;
+    }
 
-    //implementando o radixsort
-    radixsortID(jogadorID, controle);
-    
+    for(int i = 1; i < 11; i++){
 
-    for(int i = 0; i < controle; i++){
         imprimir(jogadorID[i]);
     }
 

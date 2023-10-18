@@ -60,7 +60,7 @@ import java.lang.System;
         long inicio = System.currentTimeMillis();
         Scanner scanner = new Scanner(System.in);
         ArrayList<Jogador> jogadores = new ArrayList<Jogador>();
-        String arquivo = "/tmp/playersAtualizado.csv";
+        String arquivo = "/tmp/players.csv";
         try (BufferedReader br = new BufferedReader(new FileReader(arquivo))) {
             String linha = br.readLine();
             linha = br.readLine();

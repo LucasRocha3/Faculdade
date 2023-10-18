@@ -198,64 +198,35 @@ typedef struct Jogador{
         *y = *x;
         *x = tmp;
     }
-    // Função para obter o dígito apropriado do ID do atributo
-    int getDigito(int id, int exp) {
-        // Exp deve ser 1, 10, 100, ... para pegar os dígitos do ID
-            return (id / exp) % 10;
-        }
 
-    void radixsort(Jogador *array, int n, int exp) {
-        Jogador output[n];
-        int count[10] = {0}; // Inicializa o array de contagem
-
-        // Contagem dos elementos
-        for (int i = 0; i < n; i++) {
-            int id = getID(&array[i]);
-            int digit = getDigito(id, exp);
-            count[digit]++;
-        }
-
-        // Agora, count[i] contém o número de elementos menores ou iguais a i
-        for (int i = 1; i < 10; i++) {
-            count[i] += count[i - 1];
-        }
-
-        // Ordenando
-        for (int i = n - 1; i >= 0; i--) {
-            int id = getID(&array[i]);
-            int digit = getDigito(id, exp);
-            output[count[digit] - 1] = array[i];
-            count[digit]--;
-        }
-
-        // Copiando de volta para o array original
-        for (int i = 0; i < n; i++) {
-            array[i] = output[i];
+    void construir(Jogador jogador[], int tamHeap){
+        for(int i = tamHeap; i > 1 && getAltura(&jogador[i]) > getAltura(&jogador[i/2]) || (getAltura(&jogador[2*i]) == getAltura(&jogador[2 * i + 1]) && strcmp(getNome(&jogador[2*i]), getNome(&jogador[2 * i + 1])) > 0); i /= 2){
+            swap(&jogador[i], &jogador[i / 2]);
         }
     }
 
-    int getMaiorID(Jogador *array, int n) {
-        int maxID = getID(&array[0]);
-        for (int i = 1; i < n; i++) {
-            int id = getID(&array[i]);
-            if (id > maxID) {
-                maxID = id;
+    int getMaiorFilho(Jogador jogador[], int i, int tamHeap){
+        int filho;
+        if (2*i == tamHeap || getAltura(&jogador[2*i]) > getAltura(&jogador[2 * i + 1]) || (getAltura(&jogador[2*i]) == getAltura(&jogador[2 * i + 1]) && strcmp(getNome(&jogador[2*i]), getNome(&jogador[2 * i + 1])) > 0)){
+            filho = 2*i;
+        } else {
+            filho = 2*i + 1;
+        }
+        return filho;
+    }
+
+    void reconstruir(Jogador jogador[], int tamHeap){
+        int i = 1;
+        while(i <= (tamHeap/2)){
+            int filho = getMaiorFilho(jogador, i, tamHeap);
+            if(getAltura(&jogador[i]) < getAltura(&jogador[filho]) || (getAltura(&jogador[2*i]) == getAltura(&jogador[2 * i + 1]) && strcmp(getNome(&jogador[2*i]), getNome(&jogador[2 * i + 1])) < 0)){
+                swap(&jogador[i], &jogador[filho]);
+                i = filho;
+            }else{
+                i = tamHeap;
             }
         }
-        return maxID;
     }
-    void radixsortID(Jogador *array, int n) {
-        int maxID = getMaiorID(array, n);
-
-        // Exp começa em 1 e é multiplicado por 10 a cada iteração para pegar cada dígito do ID
-        for (int exp = 1; maxID / exp > 0; exp *= 10) {
-            radixsort(array, n, exp);
-        }
-    }
-
-    
-
-
 
 
 int main(void) {
@@ -291,12 +262,33 @@ int main(void) {
         }
         scanf("%s", entrada);
     }
+    //algorítmo de ordenacão por heapsort pelo ano de nascimento
 
-    //implementando o radixsort
-    radixsortID(jogadorID, controle);
-    
-
+    //Alterar o vetor ignorando a posicao zero
+    Jogador jogadorTmp[controle+1];
     for(int i = 0; i < controle; i++){
+        jogadorTmp[i+1] = jogadorID[i];
+    }
+
+    //Contrucao do heap
+    for(int tamHeap = 2; tamHeap <= controle; tamHeap++){
+        construir(jogadorTmp, tamHeap);
+    }
+
+    //Ordenacao propriamente dita
+    int tamHeap = controle;
+    while(tamHeap > 1){
+        swap(&jogadorTmp[1], &jogadorTmp[tamHeap--]);
+        reconstruir(jogadorTmp, tamHeap);
+    }
+
+    //Alterar o vetor para voltar a posicao zero
+    for(int i = 0; i < controle; i++){
+        jogadorID[i] = jogadorTmp[i+1];
+    }
+
+    for(int i = 1; i < 11; i++){
+
         imprimir(jogadorID[i]);
     }
 

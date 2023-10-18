@@ -223,7 +223,7 @@ int main(void) {
     Jogador jogador[4000];
     
     FILE *arq;
-    arq = fopen("/tmp/playersAtualizado.csv", "r, ccs=UTF-8");
+    arq = fopen("/tmp/players.csv", "r, ccs=UTF-8");
     char linha[1000];
     int virgulas[7];
     int contVirgula;
